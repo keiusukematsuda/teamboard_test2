@@ -1,0 +1,282 @@
+{% extends "events/base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="container">
+            <div class="card bg-light my-4">
+                <div class="card-header bg-secondary text-light">
+                    <h1 class="float-left">{{ event.name }}</h1>
+                    {% if attend.attend_state %}
+                        <button class="btn btn-secondary btn-outline-light float-right mt-sm-2 text-center" type="button" data-toggle="modal" data-target="#attend_update">
+                            <span><i class="material-icons">emoji_people</i></span>
+                        </button>
+                    {% else %}
+                        <button class="btn btn-secondary btn-outline-light float-right mt-sm-2 text-center" type="button" data-toggle="modal" data-target="#attend">
+                            <span><i class="material-icons">emoji_people</i></span>
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12 mt-3">
+                            <ul class="container">
+                                <div class=""><span class="badge badge-pill badge-success">&nbsp;Type&nbsp;</span><span class="ml-3">{{ event.get_type_display }}</span></div>
+                                <div class="mt-3"><span class="badge badge-pill badge-success">&nbsp;Date&nbsp;</span><span class="ml-3">{{ event.date_time }}</span></div>
+                                <div class="mt-3"><span class="badge badge-pill badge-success">Venue</span><span class="ml-3">{{ event.place }}</span></div>
+                                <div class="mt-3"><span class="badge badge-pill badge-success">Owner</span><span class="ml-3">{{ event.created_by.dspname }}</span></div>
+                            </ul>
+                            <div class="container">
+                                <button class="btn btn-block btn-secondary mt-5 mx-auto" type="button"  data-toggle="modal" data-target="#attending_member" style="width:400px">
+                                    <span><i class="material-icons">group</i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-5">
+                        <div class="container mb-4">
+                            <ul class="list-group">
+                                {% for comment in comments %}
+                                    <li class="list-group-item">
+                                        <img class="rounded img-fluid" src="{{ comment.commented_by.icon.url }}" style="height: 30px; width: 30px;" /><strong class="ml-2">{{ comment.commented_by.dspname }}</strong>
+                                        <div class="container mt-4">
+                                            <span>{{ comment.content }}</span>
+                                        </div>
+                                        <div class="container border-top mt-3">
+                                            <span class="small float-right">{{ comment.commented_at }}</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="paginator container">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if comments.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?p={{ comments.previous_page_number }}">
+                                                <i class="material-icons">arrow_left</i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    {% if comments.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?p={{ comments.next_page_number }}">
+                                                <i class="material-icons">arrow_right</i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        <div class="container">
+                            <button class="btn btn-block btn-secondary mx-auto" type="button"  data-toggle="modal" data-target="#comment" style="width:400px">
+                                <span><i class="material-icons">add_comment</i></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 参加表明用のモーダル -->
+    <!-- 作成時-->
+    <div class="modal fade" id="attend" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4><div class="modal-title" id="myModalLabel">参加表明する</div></h4>
+                </div>
+                <form method="post" action="{% url 'events:event_detail' event.id %}">
+                    {% csrf_token%}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="funkyradio">
+                                <div class="funkyradio-primary">
+                                    <input type="radio" name="attend_state" id="attend_state_1" checked value="1"/>
+                                    <label for="attend_state_1">参加</label>
+                                </div>
+                                <div class="funkyradio-success">
+                                    <input type="radio" name="attend_state" id="attend_state_2" value="2"/>
+                                    <label for="attend_state_2">参加より保留</label>
+                                </div>
+                                <div class="funkyradio-warning">
+                                    <input type="radio" name="attend_state" id="attend_state_3" value="3"/>
+                                    <label for="attend_state_3">不参加より保留</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-dark">OK</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="attend_update" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4><div class="modal-title" id="myModalLabel2">変更する</div></h4>
+                </div>
+                <form method="post" action="{% url 'events:event_detail' event.id %}">
+                    {% csrf_token%}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <div class="funkyradio">
+                                <div class="funkyradio-primary">
+                                    <input type="radio" name="attend_state" id="update_attend_state_1" checked value="1"/>
+                                    <label for="update_attend_state_1">参加</label>
+                                </div>
+                                <div class="funkyradio-success">
+                                    <input type="radio" name="attend_state" id="update_attend_state_2" value="2"/>
+                                    <label for="update_attend_state_2">参加より保留</label>
+                                </div>
+                                <div class="funkyradio-warning">
+                                    <input type="radio" name="attend_state" id="update_attend_state_3" value="3"/>
+                                    <label for="update_attend_state_3">不参加より保留</label>
+                                </div>
+                                <div class="funkyradio-danger">
+                                    <input type="radio" name="attend_state" id="update_attend_state_4" value="4"/>
+                                    <label for="update_attend_state_4">キャンセル</label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">戻る</button>
+                        <button type="submit" class="btn btn-dark">OK</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="attending_member" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4><div class="modal-title" id="myModalLabel3">参加メンバー</div></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="btn-primary text-center"><h3>参加 : {{ event.num_join }}人</h3></div>
+                        <div class="row">
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 1 and attend.user.sex == 1 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 1 and attend.user.sex == 2 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="btn-success text-center mt-2"><h3>参加より保留 : {{ event.num_pend_join }}人</h3></div>
+                        <div class="row">
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 2 and attend.user.sex == 1 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 2 and attend.user.sex == 2 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="btn-warning text-light text-center mt-2"><h3>不参加より保留 : {{ event.num_pend_def }}人</h3></div>
+                        <div class="row">
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 3 and attend.user.sex == 1 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 3 and attend.user.sex == 2 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="btn-danger text-center mt-2"><h3>キャンセル : {{ event.num_cancel }}人</h3></div>
+                        <div class="row">
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 4 and attend.user.sex == 1 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                            <div class="col-6">
+                                {% for attend in attends %}
+                                    <ul class="list-group">
+                                        {% if attend.attend_state == 4 and attend.user.sex == 2 %}
+                                            <li class="list-group-item"><img class="rounded img-fluid" src="{{ attend.user.icon.url}}" style="height: 40px; width: 40px;" /><small class="ml-3">{{ attend.user.dspname }}</small></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">戻る</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- コメント投稿用モーダル -->
+    <div class="modal fade" id="comment" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="{% url 'events:event_detail' event.id %}">
+                    <div class="modal-header">
+                    </div>
+                    <div class="modal-body">
+                        <li class="list-group-item">
+                                {% csrf_token %}
+                                <img class="rounded img-fluid" src="{{ request.user.icon.url }}" style="height: 30px; width: 30px;" /><strong class="ml-2">{{ request.user.dspname }}</strong>
+                                <div class="container mt-4">
+                                    <textarea id="textarea" class="form-control" name="content"></textarea>
+                                </div>
+                            <div class="container border-top mt-3">
+                            </div>
+                        </li>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">戻る</button>
+                        <button type="submit" class="btn btn-dark">投稿</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

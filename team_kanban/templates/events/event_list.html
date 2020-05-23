@@ -1,0 +1,62 @@
+{% extends "events/base.html" %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="container mx-xs-0 my-sm-3 clearfix">
+                <a class="btn btn-block btn-secondary mx-auto" href="{% url 'events:event_register' %}" data-target="#comment" style="width:400px" >
+                    <span><i class="material-icons">add</i></span>
+                </a>
+            </div>
+            <div class="container my-sm-3">
+                {% for event in events %}
+                    <div class="card bg-light mb-3">
+                        <div class="card-header text-secondary">
+                            <div class="container">
+                                <h3 class="float-left"><b>{{ event.name }}</b></h3>
+                                <a class="btn btn-outline-secondary float-right" href="{% url 'events:event_detail' event.id %}">
+                                    <span><i class="material-icons">forward</i></span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                <div class="col-9 float-left">
+                                    <div class=""><span class="badge badge-pill badge-success">&nbsp;Type&nbsp;</span><span class="ml-3">{{ event.get_type_display }}</span></div>
+                                    <div class="mt-2"><span class="badge badge-pill badge-success">&nbsp;Date&nbsp;</span><span class="ml-3">{{ event.date_time }}</span></div>
+                                    <div class="mt-2"><span class="badge badge-pill badge-success">Venue</span><span class="ml-3">{{ event.place }}</span></div>
+                                </div>
+                                <div class="col-3 float-right mt-3">
+                                    <span class="badge badge-danger float-right">{{ event.num_cancel }}</span>
+                                    <span class="badge badge-warning float-right mr-1">{{ event.num_pend_def }}</span>
+                                    <span class="badge badge-success float-right mr-1">{{ event.num_pend_join }}</span>
+                                    <span class="badge badge-primary float-right mr-1">{{ event.num_join }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="paginator">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if events.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?p={{ events.previous_page_number }}">
+                                    <i class="material-icons">arrow_left</i>
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% if events.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?p={{ events.next_page_number }}">
+                                    <i class="material-icons">arrow_right</i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+{% endblock %}
